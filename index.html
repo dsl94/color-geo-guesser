@@ -2,156 +2,175 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Color Geo-Guesser</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Geo-Guesser Game</title>
 <style>
   body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
-    background: #f0f2f5;
+    padding: 0;
+    background: #f5f5f5;
     color: #333;
   }
   header {
-    background: #4a90e2;
-    color: white;
-    padding: 15px;
     text-align: center;
-    font-size: 1.5rem;
+    padding: 20px;
+    background: #4CAF50;
+    color: white;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2em;
+  }
+  header p {
+    margin: 5px 0 0;
+    font-size: 0.9em;
   }
   .container {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1.5fr;
+    display: flex;
     gap: 20px;
     padding: 20px;
+    flex-wrap: wrap;
   }
-  @media (max-width: 900px) {
-    .container {
-      grid-template-columns: 1fr;
-    }
-  }
-  .card {
+  .column {
+    flex: 1;
     background: white;
-    border-radius: 12px;
     padding: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    min-width: 280px;
   }
   h2 {
     margin-top: 0;
-    font-size: 1.2rem;
-    color: #4a90e2;
   }
-  input[type="text"], input[type="number"] {
-    width: 100%;
+  input, button {
+    width: 96%;
     padding: 8px;
-    margin: 5px 0 10px;
+    margin: 6px 0;
     border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: 5px;
   }
   button {
-    padding: 8px 14px;
-    margin: 5px;
-    background: #4a90e2;
-    border: none;
-    border-radius: 8px;
+    background: #4CAF50;
     color: white;
-    font-size: 0.95rem;
+    font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
+    border: none;
   }
   button:hover {
-    background: #3b7bc0;
+    background: #45a049;
+  }
+  .game-area {
+    text-align: center;
   }
   #target {
     width: 150px;
     height: 150px;
+    margin: 0 auto 10px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    margin-bottom: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
   }
   canvas {
     border-radius: 50%;
     cursor: crosshair;
+    margin: 10px 0;
   }
-  .score-summary {
-    font-size: 1rem;
+  .scores {
+    display: flex;
+    justify-content: space-around;
     margin-top: 10px;
+    font-weight: bold;
   }
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.9em;
   }
-  th, td {
-    border-bottom: 1px solid #eee;
-    padding: 6px;
+  table th, table td {
+    border: 1px solid #ddd;
+    padding: 5px;
     text-align: center;
   }
+  table th {
+    background: #eee;
+  }
   .color-box {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 25px;
+    height: 25px;
+    border: 1px solid #ccc;
     display: inline-block;
   }
-  /* Tutorial section */
+  /* Tutorial overlay */
   #tutorial-section {
     display: none;
-    background: white;
-    border-radius: 12px;
     padding: 15px;
-    margin-top: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    margin: 15px;
   }
-  #tutorial-section h3 {
-    margin-top: 0;
-    color: #4a90e2;
+  /* Mobile responsive fix */
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
   }
 </style>
 </head>
 <body>
 
-<header>🎨 Color Geo-Guesser</header>
+<header>
+  <h1>Color Geo-Guesser</h1>
+  <p>Inspired by <a href="https://www.youtube.com/shorts/BWbMxeNv_Qg" target="_blank" style="color:white;text-decoration:underline;">The Studio</a> — all credits go to them</p>
+</header>
+
+<div style="text-align:center; margin-top:10px;">
+  <button onclick="toggleTutorial()">Tutorial</button>
+</div>
+<div id="tutorial-section">
+  <h3>How to Play</h3>
+  <p>
+    This is a two-player color matching game. A target color will appear on the left side.  
+    Players take turns clicking on the color wheel to choose the color they think matches the target.  
+    The closer your chosen color is to the target, the lower your score for that turn.  
+  </p>
+  <p>
+    After both players have played, the round ends and scores are recorded.  
+    After the set number of rounds, the player with the lowest total score wins.  
+  </p>
+  <button onclick="toggleTutorial()">Close Tutorial</button>
+</div>
 
 <div class="container">
   <!-- Column 1: Setup -->
-  <div class="card">
+  <div class="column">
     <h2>Setup</h2>
     <label>Player 1 Name:</label>
-    <input type="text" id="player1" placeholder="Player 1">
+    <input type="text" id="player1" placeholder="Enter name">
     <label>Player 2 Name:</label>
-    <input type="text" id="player2" placeholder="Player 2">
+    <input type="text" id="player2" placeholder="Enter name">
     <label>Number of Rounds:</label>
     <input type="number" id="rounds" min="1" value="5">
-    <button id="start-btn">Start Game</button>
-    <button id="reset-btn">Reset</button>
-    <button id="tutorial-btn">Tutorial</button>
-
-    <div id="tutorial-section">
-      <h3>How to Play</h3>
-      <p>
-        In Color Geo-Guesser, two players compete to match a target color shown on the left by clicking on a color wheel.  
-        <strong>Gameplay:</strong>  
-        1. Player 1 clicks the color wheel to choose their guess.  
-        2. Player 2 takes their turn.  
-        3. Both players’ scores are based on how close their chosen color is to the target color (lower score = better match).  
-        4. After the set number of rounds, the player with the lowest total score wins.
-      </p>
-      <p>Tip: Try to pick colors by matching hue and saturation closely for a better score.</p>
-      <button onclick="document.getElementById('tutorial-section').style.display='none'">Close Tutorial</button>
-    </div>
+    <button style="width: 100%" onclick="startGame()">Start Game</button>
+    <button style="width: 100%" onclick="resetGame()">Reset Game</button>
   </div>
 
   <!-- Column 2: Game -->
-  <div class="card" style="text-align:center;">
+  <div class="column game-area">
     <h2>Game</h2>
+    <p>Round: <span id="roundNumber">0</span> / <span id="totalRounds">0</span></p>
     <div id="target"></div>
-    <canvas id="wheel" width="250" height="250"></canvas>
-    <div class="score-summary" id="score-summary">Scores will appear here</div>
+    <canvas id="wheel" width="300" height="300"></canvas>
+    <div class="scores">
+      <span id="p1Score">P1: 0</span>
+      <span id="p2Score">P2: 0</span>
+    </div>
   </div>
 
   <!-- Column 3: Score Table -->
-  <div class="card">
-    <h2>Score Table</h2>
-    <table>
+  <div class="column">
+    <h2>Round Scores</h2>
+    <table id="scoreTable">
       <thead>
         <tr>
           <th>Round</th>
@@ -161,174 +180,155 @@
           <th>Score</th>
         </tr>
       </thead>
-      <tbody id="score-table-body"></tbody>
+      <tbody></tbody>
     </table>
   </div>
 </div>
 
 <script>
-  const wheelCanvas = document.getElementById('wheel');
-  const ctx = wheelCanvas.getContext('2d');
-  const targetDiv = document.getElementById('target');
-  const scoreSummary = document.getElementById('score-summary');
-  const tableBody = document.getElementById('score-table-body');
+let ctx = document.getElementById('wheel').getContext('2d');
+let targetColor, targetHSL;
+let currentPlayer = 1;
+let p1Total = 0, p2Total = 0;
+let roundsToPlay = 0, currentTurn = 0;
+let roundData = [];
 
-  let playerNames = ["Player 1", "Player 2"];
-  let totalRounds = 5;
-  let currentPlayer = 0;
-  let roundCount = 0;
-  let scores = [0, 0];
-  let targetColor;
-  let gameActive = false;
+function toggleTutorial(){
+  let sec = document.getElementById('tutorial-section');
+  sec.style.display = sec.style.display === 'block' ? 'none' : 'block';
+}
 
-  document.getElementById('start-btn').addEventListener('click', startGame);
-  document.getElementById('reset-btn').addEventListener('click', resetGame);
-  document.getElementById('tutorial-btn').addEventListener('click', () => {
-    document.getElementById('tutorial-section').style.display = 'block';
-  });
-
-  function startGame() {
-    playerNames[0] = document.getElementById('player1').value || "Player 1";
-    playerNames[1] = document.getElementById('player2').value || "Player 2";
-    totalRounds = parseInt(document.getElementById('rounds').value) || 5;
-    resetGame();
-    gameActive = true;
-    newTarget();
-    updateScoreSummary();
+function hslToRgb(h, s, l) {
+  let r, g, b;
+  if (s === 0) r = g = b = l;
+  else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l*s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
   }
+  return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+}
 
-  function resetGame() {
-    scores = [0, 0];
-    currentPlayer = 0;
-    roundCount = 0;
-    tableBody.innerHTML = '';
-    scoreSummary.textContent = "Scores will appear here";
-    gameActive = false;
-  }
-
-  function drawColorWheel() {
-    const radius = wheelCanvas.width / 2;
-    const image = ctx.createImageData(wheelCanvas.width, wheelCanvas.height);
-    const data = image.data;
-
-    for (let y = -radius; y < radius; y++) {
-      for (let x = -radius; x < radius; x++) {
-        const dx = x / radius;
-        const dy = y / radius;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance <= 1) {
-          let angle = Math.atan2(dy, dx);
-          if (angle < 0) angle += 2 * Math.PI;
-          const hue = angle * 180 / Math.PI;
-          const saturation = distance;
-          const lightness = 0.5;
-
-          const [r, g, b] = hslToRgb(hue / 360, saturation, lightness);
-          const px = ((y + radius) * wheelCanvas.width + (x + radius)) * 4;
-          data[px] = r;
-          data[px + 1] = g;
-          data[px + 2] = b;
-          data[px + 3] = 255;
-        }
+function drawColorWheel(){
+  const radius = 150;
+  const img = ctx.createImageData(300, 300);
+  const data = img.data;
+  for (let y = -radius; y < radius; y++) {
+    for (let x = -radius; x < radius; x++) {
+      const dx = x / radius;
+      const dy = y / radius;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist <= 1) {
+        let angle = Math.atan2(dy, dx);
+        if (angle < 0) angle += 2 * Math.PI;
+        const hue = angle * 180 / Math.PI;
+        const sat = dist;
+        const light = 0.5;
+        const [r,g,b] = hslToRgb(hue/360, sat, light);
+        const px = ((y+radius)*300 + (x+radius)) * 4;
+        data[px] = r; data[px+1] = g; data[px+2] = b; data[px+3] = 255;
       }
     }
-    ctx.putImageData(image, 0, 0);
   }
+  ctx.putImageData(img, 0, 0);
+}
 
-  function hslToRgb(h, s, l) {
-    let r, g, b;
-    if (s === 0) {
-      r = g = b = l;
-    } else {
-      const hue2rgb = (p, q, t) => {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-        return p;
-      };
-      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
+function randomColor(){
+  return { h: Math.random()*360, s: 1, l: 0.5 };
+}
+
+function setTarget(){
+  targetHSL = randomColor();
+  const [r,g,b] = hslToRgb(targetHSL.h/360, targetHSL.s, targetHSL.l);
+  document.getElementById('target').style.backgroundColor = `rgb(${r},${g},${b})`;
+}
+
+function startGame(){
+  let p1 = document.getElementById('player1').value || "Player 1";
+  let p2 = document.getElementById('player2').value || "Player 2";
+  roundsToPlay = parseInt(document.getElementById('rounds').value) || 5;
+  document.getElementById('totalRounds').textContent = roundsToPlay;
+  document.getElementById('roundNumber').textContent = 1;
+  p1Total = p2Total = 0;
+  currentPlayer = 1;
+  currentTurn = 1;
+  roundData = [];
+  document.querySelector('#scoreTable tbody').innerHTML = '';
+  document.getElementById('p1Score').textContent = `${p1}: 0`;
+  document.getElementById('p2Score').textContent = `${p2}: 0`;
+  setTarget();
+}
+
+function resetGame(){
+  location.reload();
+}
+
+function colorDistance(c1, c2){
+  return Math.sqrt((c1[0]-c2[0])**2 + (c1[1]-c2[1])**2 + (c1[2]-c2[2])**2);
+}
+
+document.getElementById('wheel').addEventListener('click', e => {
+  if (!roundsToPlay) return;
+  const rect = e.target.getBoundingClientRect();
+  const x = e.clientX - rect.left - 150;
+  const y = e.clientY - rect.top - 150;
+  const dist = Math.sqrt(x*x + y*y);
+  if (dist > 150) return;
+  let angle = Math.atan2(y,x);
+  if (angle < 0) angle += 2 * Math.PI;
+  const hue = angle * 180 / Math.PI;
+  const sat = dist / 150;
+  const light = 0.5;
+  const guessRGB = hslToRgb(hue/360, sat, light);
+  const targetRGB = hslToRgb(targetHSL.h/360, targetHSL.s, targetHSL.l);
+  const score = +colorDistance(guessRGB, targetRGB).toFixed(2);
+
+  let pName = currentPlayer === 1 ? (document.getElementById('player1').value || "Player 1") : (document.getElementById('player2').value || "Player 2");
+  let targetSwatch = `<div class='color-box' style="background: rgb(${targetRGB.join(',')})"></div>`;
+  let guessSwatch = `<div class='color-box' style="background: rgb(${guessRGB.join(',')})"></div>`;
+  
+  roundData.push({round: Math.ceil(currentTurn/2), player: pName, target: targetSwatch, guess: guessSwatch, score});
+  
+  let row = `<tr>
+    <td>${Math.ceil(currentTurn/2)}</td>
+    <td>${pName}</td>
+    <td>${targetSwatch}</td>
+    <td>${guessSwatch}</td>
+    <td>${score}</td>
+  </tr>`;
+  document.querySelector('#scoreTable tbody').insertAdjacentHTML('beforeend', row);
+
+  if (currentPlayer === 1) p1Total += score; else p2Total += score;
+
+  document.getElementById('p1Score').textContent = `${document.getElementById('player1').value || "Player 1"}: ${p1Total.toFixed(2)}`;
+  document.getElementById('p2Score').textContent = `${document.getElementById('player2').value || "Player 2"}: ${p2Total.toFixed(2)}`;
+
+  if (currentPlayer === 2) {
+    if (Math.ceil(currentTurn/2) >= roundsToPlay) {
+      let winner = p1Total < p2Total ? document.getElementById('player1').value || "Player 1" : document.getElementById('player2').value || "Player 2";
+      let winScore = p1Total < p2Total ? p1Total.toFixed(2) : p2Total.toFixed(2);
+      alert(`Winner: ${winner} with score ${winScore}`);
+      roundsToPlay = 0;
+      return;
     }
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    document.getElementById('roundNumber').textContent = Math.ceil((currentTurn+1)/2);
   }
+  currentPlayer = currentPlayer === 1 ? 2 : 1;
+  currentTurn++;
+  setTarget();
+});
 
-  function newTarget() {
-    const h = Math.random() * 360;
-    const s = 1;
-    const l = 0.5;
-    targetColor = { h, s, l };
-    const [r, g, b] = hslToRgb(h / 360, s, l);
-    targetDiv.style.backgroundColor = `rgb(${r},${g},${b})`;
-  }
-
-  function colorDistance(c1, c2) {
-    return Math.sqrt(
-      Math.pow(c1[0] - c2[0], 2) +
-      Math.pow(c1[1] - c2[1], 2) +
-      Math.pow(c1[2] - c2[2], 2)
-    );
-  }
-
-  wheelCanvas.addEventListener('click', e => {
-    if (!gameActive) return;
-    const rect = wheelCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left - wheelCanvas.width / 2;
-    const y = e.clientY - rect.top - wheelCanvas.height / 2;
-    const distance = Math.sqrt(x * x + y * y);
-    if (distance > wheelCanvas.width / 2) return;
-
-    let angle = Math.atan2(y, x);
-    if (angle < 0) angle += 2 * Math.PI;
-    const hue = angle * 180 / Math.PI;
-    const saturation = distance / (wheelCanvas.width / 2);
-    const lightness = 0.5;
-    const guessRGB = hslToRgb(hue / 360, saturation, lightness);
-
-    const targetRGB = hslToRgb(targetColor.h / 360, targetColor.s, targetColor.l);
-    const dist = colorDistance(guessRGB, targetRGB);
-    const maxDist = Math.sqrt(3 * Math.pow(255, 2));
-    const score = +(dist / maxDist).toFixed(3);
-
-    scores[currentPlayer] += score;
-    addTableRow(currentPlayer, guessRGB, targetRGB, score);
-
-    if (currentPlayer === 1) {
-      roundCount++;
-      if (roundCount >= totalRounds) {
-        gameActive = false;
-        let winner = scores[0] < scores[1] ? playerNames[0] : playerNames[1];
-        let winnerScore = Math.min(scores[0], scores[1]).toFixed(3);
-        alert(`🏆 Winner: ${winner} with score ${winnerScore}`);
-      } else {
-        newTarget();
-      }
-    }
-    currentPlayer = 1 - currentPlayer;
-    updateScoreSummary();
-  });
-
-  function addTableRow(playerIndex, guessRGB, targetRGB, score) {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${roundCount + (playerIndex === 1 ? 1 : 0)}</td>
-      <td>${playerNames[playerIndex]}</td>
-      <td><div class="color-box" style="background: rgb(${targetRGB.join(',')})"></div></td>
-      <td><div class="color-box" style="background: rgb(${guessRGB.join(',')})"></div></td>
-      <td>${score}</td>
-    `;
-    tableBody.appendChild(row);
-  }
-
-  function updateScoreSummary() {
-    scoreSummary.textContent = `${playerNames[0]}: ${scores[0].toFixed(3)} | ${playerNames[1]}: ${scores[1].toFixed(3)} | Round ${roundCount}/${totalRounds}`;
-  }
-
-  drawColorWheel();
+drawColorWheel();
 </script>
 
 </body>
